@@ -48,6 +48,25 @@ class DataGenerator:
         plt.show()
 
 
+class LinearRegression:
+    def __init__(self, x: np.array, y: np.array):
+        self.x = x  # size (n,1)
+        self.y = y  # size (n,1)
+
+    def get_X(self, p_model):
+        self.X = DataGenerator(p=1, n=1, sigma=0).get_X(p_model=p_model, x=self.x)
+        return self.X
+
+    def calculate_beta(self):
+        Xt = np.transpose(self.X)
+        XtX = Xt * self.X
+        beta_hat = np.linalg.inv(a=XtX) * Xt * self.y
+        return beta_hat
+
+    def infer_y_hat(self):
+        y_hat = 0
+
+
 if __name__ == "__main__":
     p = 1
     n = 100
