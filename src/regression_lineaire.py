@@ -13,17 +13,17 @@ class DataGenerator:
         self.beta = np.random.uniform(low=-10, high=10, size=(self.p + 1, 1))
         return self.beta
 
-    def generate_x(self, min_x=-100, max_x=100):
+    def generate_x(self, min_x=-10, max_x=10):
         x = np.random.uniform(low=min_x, high=max_x, size=(self.n, 1))
         self.x = x
         return self.x
 
     def get_X(self, p_model=None, x=None):
-        if x == None:
+        if not isinstance(x, np.ndarray):
             x = self.x
         if p_model == None:
             p_model = self.p
-        X = np.ones(shape=(self.n, 1))
+        X = np.ones(shape=(len(x), 1))
         old_value = X
         for i in range(p_model):
             new_value = old_value * x
@@ -54,23 +54,51 @@ class LinearRegression:
         self.y = y  # size (n,1)
 
     def get_X(self, p_model):
-        self.X = DataGenerator(p=1, n=1, sigma=0).get_X(p_model=p_model, x=self.x)
+        x = self.x
+        self.X = DataGenerator(p=1, n=1, sigma=0).get_X(p_model=p_model, x=x)
         return self.X
 
     def calculate_beta(self):
         Xt = np.transpose(self.X)
-        XtX = Xt * self.X
-        beta_hat = np.linalg.inv(a=XtX) * Xt * self.y
+        XtX = Xt @ self.X
+        beta_hat = np.linalg.inv(a=XtX) @ Xt @ self.y
+        self.beta_hat = beta_hat
         return beta_hat
 
     def infer_y_hat(self):
-        y_hat = 0
+        y_hat = self.X @ self.beta_hat
+        self.y_hat = y_hat
+        return y_hat
+
+    def show_plot(self):
+        unordered_x = self.x[:].reshape((-1))
+        unordered_y = self.y[:].reshape((-1))
+        unordered_y_hat = self.y_hat[:].reshape((-1))
+
+        # Step 1: Get the indices that would sort array1
+        sorted_indices = np.argsort(unordered_x)
+
+        # Step 2: Use the sorted indices to sort both arrays
+        ordered_x = unordered_x[sorted_indices]
+        ordered_y = unordered_y[sorted_indices]
+        ordered_y_hat = unordered_y_hat[sorted_indices]
+
+        plt.scatter(ordered_x, ordered_y)
+        plt.plot(ordered_x, ordered_y_hat, color="red")
+        plt.show()
+
+    def run(self, p_model):
+        self.get_X(p_model=p_model)
+        self.calculate_beta()
+        self.infer_y_hat()
+        self.show_plot()
 
 
 if __name__ == "__main__":
-    p = 1
+    p = 7
     n = 100
-    sigma = 10
+    sigma = 2000
     gen = DataGenerator(p=p, n=n, sigma=sigma)
     gen.generate_data()
-    gen.show_data()
+    model = LinearRegression(x=gen.x, y=gen.Y)
+    model.run(p_model=p)
