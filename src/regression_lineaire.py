@@ -63,7 +63,7 @@ class DataGeneratorDeterministicX(DataGenerator):
 
 
 class LinearRegression:
-    def __init__(self, x: np.array, y: np.array, p_model):
+    def __init__(self, x: np.ndarray, y: np.ndarray, p_model):
         self.x = x  # size (n,1)
         self.y = y  # size (n,1)
         self.p_model = p_model
