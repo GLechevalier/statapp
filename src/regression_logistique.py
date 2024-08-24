@@ -53,6 +53,9 @@ class LogisticRegression:
         self.n = len(self.x)
         self.dim = len(x[0]) - 1
 
+        self.beta_tild_init = np.random.normal(size=(self.dim + 1, 1))
+        self.beta_tild_hat = np.copy(self.beta_tild_init)
+
     def loss(self, y, y_prime):
         indices = np.where(y != y_prime)
         return len(indices[0])
@@ -120,8 +123,9 @@ class LogisticRegression:
         return hess_inv @ grad_log
 
     def newton_raphson(self, n, callback=False):
-        beta_init = np.random.normal(size=(self.dim + 1, 1))
-        print("beta_init = ", beta_init)
+        beta_init = self.beta_tild_hat[:]
+        if callback:
+            print("beta_init = ", beta_init)
         beta_n = beta_init
         for i in range(n):
             if i % 5 == 0 and callback:
@@ -133,6 +137,11 @@ class LogisticRegression:
 
         self.beta_tild_hat = beta_n
         return beta_n
+
+    def compute_separator(self, x_min, x_max, beta):
+        ymin = (-(beta[0] + beta[1] * x_min) / beta[2])[0]
+        ymax = (-(beta[0] + beta[1] * x_max) / beta[2])[0]
+        return ymin, ymax
 
     def show_plot(self):
         x = self.x
@@ -146,21 +155,21 @@ class LogisticRegression:
 
         x_min = min(x[:, 1])
         x_max = max(x[:, 1])
-
-        ymin = (
-            -(self.beta_tild_hat[0] + self.beta_tild_hat[1] * x_min)
-            / self.beta_tild_hat[2]
-        )[0]
-        ymax = (
-            -(self.beta_tild_hat[0] + self.beta_tild_hat[1] * x_max)
-            / self.beta_tild_hat[2]
-        )[0]
-        plt.plot([x_min, x_max], [ymin, ymax])
+        ymin, ymax = self.compute_separator(
+            x_min=x_min, x_max=x_max, beta=self.beta_tild_hat
+        )
+        ymin_init, ymax_init = self.compute_separator(
+            x_min=x_min, x_max=x_max, beta=self.beta_tild_init
+        )
+        plt.plot(
+            [x_min, x_max], [ymin_init, ymax_init], color="grey", linestyle="dotted"
+        )
+        plt.plot([x_min, x_max], [ymin, ymax], color="black")
         plt.show()
 
 
 if __name__ == "__main__":
-    gen = DataGenerator(dimension=2, sigma=50)
+    gen = DataGenerator(dimension=2, sigma=10)
     gen.generate_data()
     # gen.show_data()
     true_beta_tild = gen.beta_tild
@@ -168,4 +177,6 @@ if __name__ == "__main__":
     beta_one = np.ones((3, 1))
     print(true_beta_tild)
     new_beta = model.newton_raphson(n=1000)
+    print(new_beta)
+    print(model.grad_log_likelihood(new_beta))
     model.show_plot()
