@@ -168,7 +168,7 @@ class LogisticRegression:
         plt.show()
 
 
-if __name__ == "__main__":
+def run_regression():
     gen = DataGenerator(dimension=2, sigma=10)
     gen.generate_data()
     # gen.show_data()
@@ -180,3 +180,7 @@ if __name__ == "__main__":
     print(new_beta)
     print(model.grad_log_likelihood(new_beta))
     model.show_plot()
+
+
+if __name__ == "__main__":
+    run_regression()
