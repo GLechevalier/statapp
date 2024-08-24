@@ -119,15 +119,53 @@ class LogisticRegression:
         hess_inv = np.linalg.inv(hess_log)
         return hess_inv @ grad_log
 
+    def newton_raphson(self, n, callback=False):
+        beta_init = np.random.normal(size=(self.dim + 1, 1))
+        print("beta_init = ", beta_init)
+        beta_n = beta_init
+        for i in range(n):
+            if i % 5 == 0 and callback:
+                print(
+                    f"step {i} : log_likelihood = ",
+                    self.log_likelihood(beta_tild=beta_n),
+                )
+            beta_n += 0.01 * self.compute_step_vector(beta_tild=beta_n)
+
+        self.beta_tild_hat = beta_n
+        return beta_n
+
+    def show_plot(self):
+        x = self.x
+        y = self.y.transpose().reshape(self.n)
+        indices1 = np.where(y == 1)
+        indices0 = np.where(y == 0)
+        x1 = x[indices1].transpose()
+        x0 = x[indices0].transpose()
+        plt.scatter(x0[1], x0[2], color="blue")
+        plt.scatter(x1[1], x1[2], color="red")
+
+        x_min = min(x[:, 1])
+        x_max = max(x[:, 1])
+
+        ymin = (
+            -(self.beta_tild_hat[0] + self.beta_tild_hat[1] * x_min)
+            / self.beta_tild_hat[2]
+        )[0]
+        ymax = (
+            -(self.beta_tild_hat[0] + self.beta_tild_hat[1] * x_max)
+            / self.beta_tild_hat[2]
+        )[0]
+        plt.plot([x_min, x_max], [ymin, ymax])
+        plt.show()
+
 
 if __name__ == "__main__":
-    gen = DataGenerator(dimension=2, sigma=1)
+    gen = DataGenerator(dimension=2, sigma=50)
     gen.generate_data()
     # gen.show_data()
     true_beta_tild = gen.beta_tild
     model = LogisticRegression(x=gen.x, y=gen.y)
-    beta_one = np.zeros((3, 1))
-    print(model.log_likelihood(beta_tild=true_beta_tild))
-    print(model.log_likelihood(beta_tild=beta_one))
-    print(model.compute_step_vector(beta_tild=true_beta_tild))
-    print(model.compute_step_vector(beta_tild=beta_one))
+    beta_one = np.ones((3, 1))
+    print(true_beta_tild)
+    new_beta = model.newton_raphson(n=1000)
+    model.show_plot()
