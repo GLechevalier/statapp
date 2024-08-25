@@ -1,12 +1,13 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from datagenerator import AbstractDataGenerator
 
 
-class DataGenerator:
+class DataGenerator(AbstractDataGenerator):
     def __init__(self, dimension=2, n_points=100, sigma=1, beta_tild=None, delta0=0.5):
+        super().__init__(sigma=sigma)
         self.dim = dimension
         self.n = n_points
-        self.sigma = sigma
         if not beta_tild:
             self.beta_tild = self.init_beta_tild()
         self.delta0 = delta0

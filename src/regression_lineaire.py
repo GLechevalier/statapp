@@ -1,9 +1,11 @@
 import matplotlib.pyplot as plt
 import numpy as np
+from datagenerator import AbstractDataGenerator
 
 
-class DataGenerator:
+class DataGenerator(AbstractDataGenerator):
     def __init__(self, p, n, sigma, beta=None):
+        super().__init__(sigma=sigma)
         self.p = p
         self.n = n
         self.sigma = sigma
