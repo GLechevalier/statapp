@@ -167,6 +167,20 @@ class LogisticRegression:
         plt.plot([x_min, x_max], [ymin, ymax], color="black")
         plt.show()
 
+    def get_confusion_matrix(self):
+        xbeta_hat = self.x @ self.beta_tild_hat
+        y_hat = np.where(xbeta_hat > 0, 1, 0)
+        a = len(np.where(y_hat == 1)[0])
+        b = len(np.where(self.y == 1)[0])
+        d = len(np.where(self.y == 0)[0])
+        e = len(np.where(self.y == y_hat)[0])
+        TP = (a + e - d) / 2
+        FP = (a - e + d) / 2
+        TN = (e - a + d) / 2
+        FN = b - TP
+        confusion_matrix = np.array([[TP, FP], [FN, TN]])
+        return confusion_matrix
+
 
 def run_regression():
     gen = DataGenerator(dimension=2, sigma=10)
@@ -180,6 +194,7 @@ def run_regression():
     print(new_beta)
     print(model.grad_log_likelihood(new_beta))
     model.show_plot()
+    print(model.get_confusion_matrix())
 
 
 if __name__ == "__main__":
